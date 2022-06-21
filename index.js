@@ -83,14 +83,14 @@ async function main() {
       try {
         const character = await findCharacterByName(arg);
 
-        const newCharacter = await createCharacter(
+        const newCharacterId = await createCharacter(
           character.fullName,
           character.imageUrl
         );
 
         const quotes = await getQuotes(character.firstName);
 
-        if (quotes.length) await insertQuotes(newCharacter, quotes);
+        if (quotes.length) await insertQuotes(newCharacterId, quotes);
 
         return console.log("Character inserted in database");
       } catch (error) {
