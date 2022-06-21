@@ -38,7 +38,7 @@ To be able to run this project, first you will need to have in your machine:
 
 ### PHP version
 
-- **<a href="https://getcomposer.org" target="_blank" rel="noopener">Composer</a>** to be ablemanage the project's dependencies and autoload
+- **<a href="https://getcomposer.org" target="_blank" rel="noopener">Composer</a>** to be able tomanage the project's dependencies and autoload
 - **<a href="https://www.php.net/downloads" target="_blank" rel="noopener">PHP</a>** on version ^8.1
 - **<a href="https://git-scm.com/downloads" target="_blank" rel="noopener">Git</a>** to be able to clone this repository
 
