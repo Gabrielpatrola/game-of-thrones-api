@@ -27,7 +27,7 @@ class Main
      * @return bool|stdClass
      * @throws Exception
      */
-    function findCharacterByName($name): bool|stdClass
+    private function findCharacterByName($name): bool|stdClass
     {
         $characters = $this->charactersApi->getAll();
         $foundCharacter = false;
@@ -51,7 +51,7 @@ class Main
      * @return Exception|string
      * @throws Exception
      */
-    function createCharacter($name, $imageUrl): Exception|string
+    private function createCharacter($name, $imageUrl): Exception|string
     {
         return $this->backend->store($name, $imageUrl);
     }
@@ -62,7 +62,7 @@ class Main
      * @return void
      * @throws Exception
      */
-    function insertQuotes($id, $quotes): void
+    private function insertQuotes($id, $quotes): void
     {
         foreach ($quotes as $quote) {
             $this->backend->storeQuote($id, $quote);
@@ -74,7 +74,7 @@ class Main
      * @return Exception|array
      * @throws Exception
      */
-    function getQuotes($name): Exception|array
+    private function getQuotes($name): Exception|array
     {
         return $this->quotesApi->getAll($name);
     }
@@ -83,7 +83,7 @@ class Main
      * @return Exception|bool|string
      * @throws Exception
      */
-    function deleteData(): Exception|bool|string
+    private function deleteData(): Exception|bool|string
     {
 
         try {
@@ -98,7 +98,7 @@ class Main
      * @return Exception|bool|string
      * @throws Exception
      */
-    function show(): Exception|bool|string
+    private function show(): Exception|bool|string
     {
         try {
             $response = $this->backend->getAll();
@@ -113,7 +113,7 @@ class Main
      * @return void
      * @throws Exception
      */
-    function main()
+    public function main(): void
     {
         $val = getopt("n:");
 
