@@ -8,7 +8,7 @@ class CharactersApi
 {
     private string $apiUrl;
     private array $headers;
-    private $callback;
+    private mixed $callback;
 
     public function __construct()
     {
@@ -30,12 +30,12 @@ class CharactersApi
 
         $payload = $this->callback;
 
-        if(empty($payload)) throw new Exception('No data');
+        if (empty($payload)) throw new Exception('No data');
 
         return $payload;
     }
 
-    private function get()
+    private function get(): void
     {
         $curl = curl_init();
 

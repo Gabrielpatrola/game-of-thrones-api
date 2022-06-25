@@ -10,7 +10,7 @@ class QuotesApi
     private array $headers;
 
     private string $endPoint;
-    private $callback;
+    private mixed $callback;
 
     public function __construct()
     {
@@ -29,7 +29,7 @@ class QuotesApi
     public function getAllQuotesByName($name)
     {
         $normalizedName = strtolower($name);
-        $this->endPoint = "character/{$normalizedName}";
+        $this->endPoint = "character/$normalizedName";
         $this->get();
 
         $payload = $this->callback;

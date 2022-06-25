@@ -78,7 +78,6 @@ class Main
      * @param $id
      * @param $quotes
      * @param $name
-     * @return void
      * @throws Exception
      */
     private function insertQuotes($id, $quotes, $name): void
@@ -87,9 +86,9 @@ class Main
             echo "sleeping 5 seconds because of api rate limit\r\n";
             sleep(5);
             $this->backend->storeQuote($id, $quote);
-            echo "quote #{$key} for {$name} inserted in database\r\n";
+            echo "quote #$key for $name inserted in database\r\n";
         }
-        echo "All quotes for {$name} inserted in database\r\n";
+        echo "All quotes for $name inserted in database\r\n";
     }
 
     /**
@@ -112,38 +111,30 @@ class Main
     }
 
     /**
-     * @return Exception|bool|string
+     * @return void
      * @throws Exception
      */
-    private function deleteData(): Exception|bool|string
+    private function deleteData(): void
     {
-        try {
-            $response = $this->backend->destroy();
-            return print_r($response);
-        } catch (Exception $e) {
-            return $e;
-        }
+        $response = $this->backend->destroy();
+        print_r($response);
     }
 
     /**
-     * @return Exception|bool|string
+     * @return void
      * @throws Exception
      */
-    private function show(): Exception|bool|string
+    private function show(): void
     {
-        try {
-            $response = $this->backend->getAll();
-            return print_r($response);
-        } catch (Exception $e) {
-            return $e;
-        }
+        $response = $this->backend->getAll();
+        print_r($response);
     }
 
     /**
      * Method that handle mass character insert in database
      * @throws Exception
      */
-    private function massInsert()
+    private function massInsert(): void
     {
         $characters = $this->findCharacters();
         $allCharactersQuotesAndInfo = $this->getAllQuotesAndInfo();
@@ -162,7 +153,7 @@ class Main
             }
 
             $newCharacterId = $this->createCharacter($character->fullName, $character->imageUrl);
-            echo "Character {$character->fullName} inserted in database\r\n";
+            echo "Character $character->fullName inserted in database\r\n";
 
             if (!empty($characterQuotes)) {
                 $this->insertQuotes($newCharacterId, $characterQuotes, $character->fullName);
@@ -184,26 +175,30 @@ class Main
             throw new Exception('Please provide a character name or a command like: list, delete');
         }
 
-        switch ($val['n']) {
-            case "delete":
-                $this->deleteData();
-                break;
-            case "list":
-                $this->show();
-                break;
-            case "mass":
-                $this->massInsert();
-                break;
-            default:
-                $character = $this->findCharacterByName($val['n']);
-                $newCharacterId = $this->createCharacter($character->fullName, $character->imageUrl);
-                $quotes = $this->getQuotesByName($character->firstName);
+        try {
+            switch ($val['n']) {
+                case "delete":
+                    $this->deleteData();
+                    break;
+                case "list":
+                    $this->show();
+                    break;
+                case "mass":
+                    $this->massInsert();
+                    break;
+                default:
+                    $character = $this->findCharacterByName($val['n']);
+                    $newCharacterId = $this->createCharacter($character->fullName, $character->imageUrl);
+                    $quotes = $this->getQuotesByName($character->firstName);
 
-                if (!empty($quotes)) {
-                    $this->insertQuotes($newCharacterId, $quotes, $character->fullNam);
-                }
-                echo 'Character inserted in database';
-                break;
+                    if (!empty($quotes)) {
+                        $this->insertQuotes($newCharacterId, $quotes, $character->fullNam);
+                    }
+                    echo 'Character inserted in database';
+                    break;
+            }
+        } catch (Exception $e) {
+            throw new Exception($e);
         }
     }
 }

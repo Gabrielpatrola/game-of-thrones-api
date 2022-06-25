@@ -4,6 +4,12 @@ namespace Source\Helpers;
 
 class Util
 {
+    /**
+     * Function that remove duplicated entries from array
+     * @param $array
+     * @param $key
+     * @return array
+     */
     function removeDuplicate($array, $key): array
     {
         $result = [];

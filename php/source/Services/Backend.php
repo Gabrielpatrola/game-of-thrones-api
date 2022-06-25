@@ -10,7 +10,7 @@ class Backend
     private array $headers;
 
     private array $params;
-    private $callback;
+    private mixed $callback;
 
     public function __construct()
     {
@@ -24,13 +24,15 @@ class Backend
 
     /**
      * Function that handles character store in external API and returns an ID
+     * @param $name
+     * @param $imageUrl
      * @return string | Exception
      * @throws Exception
      */
-    public function store($name, $imageUrl)
+    public function store($name, $imageUrl): Exception|string
     {
         $this->params = [
-            'query' => "mutation CreateCharacter {\n  insert_Character(objects: {name: \"{$name}\", image_url: \"{$imageUrl}\"}) {\n    returning {\n      id\n    }\n  }\n}",
+            'query' => "mutation CreateCharacter {\n  insert_Character(objects: {name: \"$name\", image_url: \"$imageUrl\"}) {\n    returning {\n      id\n    }\n  }\n}",
             'operationName' => 'CreateCharacter'
         ];
 
@@ -45,15 +47,17 @@ class Backend
 
     /**
      * Function that handles a character quote store in external API and returns a response object
-     * @return object | Exception
+     * @param $id
+     * @param $quote
+     * @return array
      * @throws Exception
      */
-    public function storeQuote($id, $quote)
+    public function storeQuote($id, $quote): array
     {
         $sanitazeQuote = str_replace('"', '', $quote);
 
         $this->params = [
-            'query' => "mutation CreateQuote {\n  insert_Quote(objects: {text: \"{$sanitazeQuote}\", character_id: \"{$id}\"}) {\n    returning {\n      id\n      text\n    }\n  }\n}\n",
+            'query' => "mutation CreateQuote {\n  insert_Quote(objects: {text: \"$sanitazeQuote\", character_id: \"$id\"}) {\n    returning {\n      id\n      text\n    }\n  }\n}\n",
             'operationName' => 'CreateQuote'
         ];
 
@@ -68,10 +72,10 @@ class Backend
 
     /**
      * Function that return all information in external API
-     * @return object | Exception
+     * @return object
      * @throws Exception
      */
-    public function getAll()
+    public function getAll(): object
     {
         $this->params = [
             'query' => "{\n  Character {\n    Quotes {\n      text\n      id\n    }\n    id\n    image_url\n    name\n  }\n}\n",
@@ -88,10 +92,10 @@ class Backend
 
     /**
      * Function that delete everything in external API
-     * @return object | Exception
+     * @return object
      * @throws Exception
      */
-    public function destroy()
+    public function destroy(): object
     {
         $this->params = [
             'query' => "mutation DeleteAll {\n  delete_Character(where: {id: {_gt: 0}}) {\n    affected_rows\n  }\n}\n",
