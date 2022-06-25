@@ -10,7 +10,7 @@ class QuotesApi
     private array $headers;
 
     private string $endPoint;
-    private $callback;
+    private mixed $callback;
 
     public function __construct()
     {
@@ -26,10 +26,10 @@ class QuotesApi
      * Funciton that get all quotes from an especific character from external API
      * @throws Exception
      */
-    public function getAll($name)
+    public function getAllQuotesByName($name)
     {
         $normalizedName = strtolower($name);
-        $this->endPoint = "character/{$normalizedName}";
+        $this->endPoint = "character/$normalizedName";
         $this->get();
 
         $payload = $this->callback;
@@ -37,6 +37,22 @@ class QuotesApi
         if(empty($payload)) throw new Exception('No data');
 
         return $payload[0]->quotes;
+    }
+
+    /**
+     * Funciton that get all quotes from an especific character from external API
+     * @throws Exception
+     */
+    public function getAllQuotesAndInfo()
+    {
+        $this->endPoint = "characters";
+        $this->get();
+
+        $payload = $this->callback;
+
+        if(empty($payload)) throw new Exception('No data');
+
+        return $payload;
     }
 
     private function get()
