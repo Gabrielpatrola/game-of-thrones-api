@@ -4,7 +4,7 @@ namespace Source\Helpers;
 
 class Util
 {
-    function removeDuplicate($array, $key)
+    function removeDuplicate($array, $key): array
     {
         $result = [];
         foreach ($array as $i) {

@@ -6,6 +6,8 @@ use Exception;
 use Source\Services\Backend;
 use Source\Services\QuotesApi;
 use Source\Services\CharactersApi;
+use Source\Helpers\Util;
+
 use stdClass;
 
 class Main
@@ -13,14 +15,15 @@ class Main
     private QuotesApi $quotesApi;
     private CharactersApi $charactersApi;
     private Backend $backend;
+    private Util $util;
 
     public function __construct()
     {
         $this->backend = new Backend;
         $this->charactersApi = new CharactersApi;
         $this->quotesApi = new QuotesApi;
+        $this->util = new Util;
     }
-
 
     /**
      * @param $name
@@ -46,6 +49,21 @@ class Main
     }
 
     /**
+     * @return bool|array
+     * @throws Exception
+     */
+    private function findCharacters(): bool|array
+    {
+        $characters = $this->charactersApi->getAll();
+
+        if (!$characters) {
+            throw new Exception('No data!');
+        }
+
+        return $characters;
+    }
+
+    /**
      * @param $name
      * @param $imageUrl
      * @return Exception|string
@@ -59,24 +77,38 @@ class Main
     /**
      * @param $id
      * @param $quotes
+     * @param $name
      * @return void
      * @throws Exception
      */
-    private function insertQuotes($id, $quotes): void
+    private function insertQuotes($id, $quotes, $name): void
     {
-        foreach ($quotes as $quote) {
+        foreach ($quotes as $key => $quote) {
+            echo "sleeping 5 seconds because of api rate limit\r\n";
+            sleep(5);
             $this->backend->storeQuote($id, $quote);
+            echo "quote #{$key} for {$name} inserted in database\r\n";
         }
+        echo "All quotes for {$name} inserted in database\r\n";
     }
 
     /**
      * @param $name
+     * @return Exception|array'
+     * @throws Exception
+     */
+    private function getQuotesByName($name): Exception|array
+    {
+        return $this->quotesApi->getAllQuotesByName($name);
+    }
+
+    /**
      * @return Exception|array
      * @throws Exception
      */
-    private function getQuotes($name): Exception|array
+    private function getAllQuotesAndInfo(): Exception|array
     {
-        return $this->quotesApi->getAll($name);
+        return $this->quotesApi->getAllQuotesAndInfo();
     }
 
     /**
@@ -85,7 +117,6 @@ class Main
      */
     private function deleteData(): Exception|bool|string
     {
-
         try {
             $response = $this->backend->destroy();
             return print_r($response);
@@ -109,6 +140,38 @@ class Main
     }
 
     /**
+     * Method that handle mass character insert in database
+     * @throws Exception
+     */
+    private function massInsert()
+    {
+        $characters = $this->findCharacters();
+        $allCharactersQuotesAndInfo = $this->getAllQuotesAndInfo();
+
+        $normalizedCharacters = $this->util->removeDuplicate($characters, 'fullName');
+
+        foreach ($normalizedCharacters as $character) {
+            $nameArray = explode(' ', $character->fullName);
+            $nomarlizedName = strtolower($nameArray[0]);
+
+            $characterQuotes = [];
+            foreach ($allCharactersQuotesAndInfo as $characterQuotesAndInfo) {
+                if (str_contains($characterQuotesAndInfo->slug, $nomarlizedName)) {
+                    $characterQuotes = $characterQuotesAndInfo->quotes;
+                }
+            }
+
+            $newCharacterId = $this->createCharacter($character->fullName, $character->imageUrl);
+            echo "Character {$character->fullName} inserted in database\r\n";
+
+            if (!empty($characterQuotes)) {
+                $this->insertQuotes($newCharacterId, $characterQuotes, $character->fullName);
+            }
+        }
+        echo "Mass inserted done with success!\r\n";
+    }
+
+    /**
      * Main function that handles the execution logic based on user's input
      * @return void
      * @throws Exception
@@ -118,7 +181,6 @@ class Main
         $val = getopt("n:");
 
         if (empty($val)) {
-            var_dump($val);
             throw new Exception('Please provide a character name or a command like: list, delete');
         }
 
@@ -129,13 +191,16 @@ class Main
             case "list":
                 $this->show();
                 break;
+            case "mass":
+                $this->massInsert();
+                break;
             default:
                 $character = $this->findCharacterByName($val['n']);
                 $newCharacterId = $this->createCharacter($character->fullName, $character->imageUrl);
-                $quotes = $this->getQuotes($character->firstName);
+                $quotes = $this->getQuotesByName($character->firstName);
 
                 if (!empty($quotes)) {
-                    $this->insertQuotes($newCharacterId, $quotes);
+                    $this->insertQuotes($newCharacterId, $quotes, $character->fullNam);
                 }
                 echo 'Character inserted in database';
                 break;
